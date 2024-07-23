@@ -1,5 +1,9 @@
 {
-  "tasks": {
-    "dev": "deno run --watch main.ts"
+  "name": "@jmondi/auth",
+  "version": "0.1.0-alpha.3",
+  "exports": "./mod.ts",
+  "imports": {
+    "bcryptjs": "npm:bcryptjs@2",
+    "jsonwebtoken": "npm:jsonwebtoken@9"
   }
 }

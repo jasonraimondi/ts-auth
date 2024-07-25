@@ -1,4 +1,4 @@
-import {
+import type {
   AuthUserEntity,
   AuthUserIdentifier,
 } from "../entities/auth_user_entity.ts";

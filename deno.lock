@@ -3,7 +3,10 @@
   "packages": {
     "specifiers": {
       "npm:bcryptjs": "npm:bcryptjs@2.4.3",
-      "npm:jsonwebtoken": "npm:jsonwebtoken@9.0.2"
+      "npm:bcryptjs@2": "npm:bcryptjs@2.4.3",
+      "npm:jsonwebtoken": "npm:jsonwebtoken@9.0.2",
+      "npm:jsonwebtoken@9": "npm:jsonwebtoken@9.0.2",
+      "npm:uuid@10": "npm:uuid@10.0.0"
     },
     "npm": {
       "bcryptjs@2.4.3": {
@@ -98,6 +101,10 @@
           "lru-cache": "lru-cache@6.0.0"
         }
       },
+      "uuid@10.0.0": {
+        "integrity": "sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==",
+        "dependencies": {}
+      },
       "yallist@4.0.0": {
         "integrity": "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==",
         "dependencies": {}
@@ -141,7 +148,8 @@
   "workspace": {
     "dependencies": [
       "npm:bcryptjs@2",
-      "npm:jsonwebtoken@9"
+      "npm:jsonwebtoken@9",
+      "npm:uuid@10"
     ]
   }
 }

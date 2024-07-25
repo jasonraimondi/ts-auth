@@ -1,15 +1,17 @@
-import { TokenRepositoryInterface } from "./repositories/token_repository.ts";
-import {
+import { v7 as uuidv7 } from "uuid";
+
+import type { TokenRepositoryInterface } from "./repositories/token_repository.ts";
+import type {
   AccessTokenPayload,
   JwtServiceInterface,
 } from "./services/jwt_service.ts";
-import { PasswordServiceInterface } from "./services/password_service.ts";
-import { AuthUserRepositoryInterface } from "./repositories/auth_user_repository.ts";
-import {
+import type { PasswordServiceInterface } from "./services/password_service.ts";
+import type { AuthUserRepositoryInterface } from "./repositories/auth_user_repository.ts";
+import type {
   AuthUserEntity,
   AuthUserIdentifier,
 } from "./entities/auth_user_entity.ts";
-import { SessionTokenEntity } from "./entities/token_entity.ts";
+import type { SessionTokenEntity } from "./entities/token_entity.ts";
 
 export interface LoginResponse {
   user: AuthUserEntity;
@@ -19,7 +21,7 @@ export interface LoginResponse {
 }
 
 export interface LoginInput {
-  id: string;
+  identifier: string;
   password: string;
   ipAddr: string;
   rememberMe?: boolean;
@@ -48,7 +50,9 @@ export class AuthenticationServer {
   }
 
   async login(loginInput: LoginInput): Promise<LoginResponse> {
-    const user = await this.userRepository.getByIdentifier(loginInput.id);
+    const user = await this.userRepository.getByIdentifier(
+      loginInput.identifier,
+    );
 
     if (!user) throw new Error("User not found");
 
@@ -62,7 +66,7 @@ export class AuthenticationServer {
     if (!success) throw new Error("Invalid password");
 
     await this.userRepository.incrementLastLogin?.(
-      loginInput.id,
+      loginInput.identifier,
       loginInput.ipAddr,
     );
 
@@ -72,22 +76,24 @@ export class AuthenticationServer {
 
     const tokenExpiresAt = new Date(Date.now() + tokenTTL);
 
-    const tokenJWT = this.jwtService.sign({
-      expiresAt: tokenExpiresAt,
-      id: user.email,
-      tokenVersion: user.tokenVersion,
-    });
-
     const tokenEntity: SessionTokenEntity = {
-      token: tokenJWT,
+      token: uuidv7(),
       tokenType: "session",
       tokenVersion: user.tokenVersion,
+      userIdentifier: user.identifier,
       loginIP: loginInput.ipAddr,
       createdAt: new Date(),
       expiresAt: tokenExpiresAt,
     };
 
-    await this.tokenRepository.persistToken(tokenEntity);
+    const tokenJWT = this.jwtService.sign({
+      userIdentifier: tokenEntity.userIdentifier,
+      token: tokenEntity.token,
+      expiresAt: tokenExpiresAt,
+      tokenVersion: user.tokenVersion,
+    });
+
+    await this.tokenRepository.revokeToken(tokenEntity);
 
     return { user, token: tokenJWT, tokenTTL, tokenExpiresAt };
   }

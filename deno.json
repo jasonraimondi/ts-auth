@@ -1,8 +1,9 @@
 {
   "name": "@jmondi/auth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "exports": "./mod.ts",
   "imports": {
+    "uuid": "npm:uuid@10",
     "bcryptjs": "npm:bcryptjs@2",
     "jsonwebtoken": "npm:jsonwebtoken@9"
   }

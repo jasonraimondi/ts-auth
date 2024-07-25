@@ -1,12 +1,14 @@
 import jsonwebtoken, { type JwtPayload } from "jsonwebtoken";
+import type { AuthUserIdentifier } from "../entities/auth_user_entity.ts";
 
 export type JWT = JwtPayload & {
-  id?: string;
+  token: string;
+  userIdentifier?: AuthUserIdentifier;
   expiresAt?: Date | number;
 };
 
 export interface JwtServiceInterface {
-  sign(payload: Record<string, unknown>): string;
+  sign(payload: JWT): string;
   verify<T = JwtPayload | string | null>(token: string): T;
   decode<T = JwtPayload | string | null>(token: string): T;
 }
@@ -21,12 +23,12 @@ export class JwtService implements JwtServiceInterface {
   }
 
   sign(jwt: JWT): string {
-    const { id = undefined, expiresAt = undefined, ...payload } = jwt;
+    const { userId = undefined, expiresAt = undefined, ...payload } = jwt;
     const now = this.roundToSeconds(new Date());
 
     return jsonwebtoken.sign({
       iss: this.config.issuer,
-      sub: id,
+      sub: userId,
       aud: undefined,
       exp: expiresAt ? this.roundToSeconds(expiresAt) : undefined,
       nbf: now,

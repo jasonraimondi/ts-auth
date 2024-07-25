@@ -107,7 +107,9 @@ export class AuthenticationServer {
 
     const tokenEntity = await this.tokenRepository.getToken(token);
 
-    return tokenEntity.expiresAt > new Date();
+    if (tokenEntity.expiresAt < new Date()) return false;
+
+    return payload.tokenVersion === tokenEntity.tokenVersion;
   }
 
   private isAccessTokenPayload(token: unknown): token is AccessTokenPayload {

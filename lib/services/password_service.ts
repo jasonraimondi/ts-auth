@@ -14,14 +14,14 @@ export class BcryptPasswordService implements PasswordServiceInterface {
   }
 
   async hash(password: string): Promise<string> {
-    return bcrypt.hash(password, this.saltRounds);
+    return await bcrypt.hash(password, this.saltRounds);
   }
 
   async verify(
     attempt: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    return bcrypt.compare(attempt, hashedPassword);
+    return await bcrypt.compare(attempt, hashedPassword);
   }
 }
 

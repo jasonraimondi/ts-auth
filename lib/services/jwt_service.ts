@@ -49,3 +49,15 @@ export class JwtService implements JwtServiceInterface {
     return Math.ceil(ms / 1000);
   }
 }
+
+export type AccessTokenPayload = JWT & {
+  id: string;
+  tokenVersion: number;
+  expiresAt: Date | number;
+};
+
+export class AccessTokenJwtService extends JwtService {
+  sign(payload: AccessTokenPayload): string {
+    return super.sign(payload);
+  }
+}

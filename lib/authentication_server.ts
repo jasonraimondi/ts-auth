@@ -1,13 +1,15 @@
 import { TokenRepositoryInterface } from "./repositories/token_repository.ts";
-import { JwtServiceInterface } from "./services/jwt/jwt_service.ts";
-import { PasswordServiceInterface } from "./services/bcrypt_password_service.ts";
+import {
+  AccessTokenPayload,
+  JwtServiceInterface,
+} from "./services/jwt_service.ts";
+import { PasswordServiceInterface } from "./services/password_service.ts";
 import { AuthUserRepositoryInterface } from "./repositories/auth_user_repository.ts";
 import {
   AuthUserEntity,
   AuthUserIdentifier,
 } from "./entities/auth_user_entity.ts";
 import { SessionTokenEntity } from "./entities/token_entity.ts";
-import { AccessTokenPayload } from "./services/jwt/access_token_jwt_service.ts";
 
 export interface LoginResponse {
   user: AuthUserEntity;

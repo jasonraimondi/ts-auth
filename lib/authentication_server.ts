@@ -43,21 +43,31 @@ export class AuthenticationServer {
     };
   }
 
-  async login(loginInput: LoginInput): Promise<LoginResponse> {
-    const user = await this.userRepository.getByIdentifier(
-      loginInput.identifier,
-    );
+  async verifyByUserCredentials<AuthUser extends AuthUserEntity = AuthUserEntity>(
+    identifier: AuthUserIdentifier,
+    passwordAttempt: string,
+  ): Promise<{ success: true, user: AuthUser } | { success: false, user?: never }> {
+    const user = await this.userRepository.getByIdentifier<AuthUser>(identifier);
 
-    if (!user) throw new Error("User not found");
-
-    if (!user.passwordHash) throw new Error("User has no password");
+    if (!user || !user.passwordHash) return { success: false };
 
     const success = await this.passwordService.verify(
-      loginInput.password,
+      passwordAttempt,
       user.passwordHash,
     );
 
-    if (!success) throw new Error("Invalid password");
+    if (!success) return { success: false };
+
+    return { success, user };
+  }
+
+  async login(loginInput: LoginInput): Promise<LoginResponse> {
+    const { success, user } = await this.verifyByUserCredentials(
+      loginInput.identifier,
+      loginInput.password,
+    );
+
+    if (!success) throw new Error("Invalid login attempt");
 
     await this.userRepository.incrementLastLogin?.(
       loginInput.identifier,

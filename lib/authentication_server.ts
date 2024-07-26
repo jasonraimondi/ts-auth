@@ -77,23 +77,23 @@ export class AuthenticationServer {
     const tokenExpiresAt = new Date(Date.now() + tokenTTL);
 
     const tokenEntity: SessionTokenEntity = {
+      createdAt: new Date(),
+      expiresAt: tokenExpiresAt,
+      loginIP: loginInput.ipAddr,
       token: uuidv7(),
       tokenType: "session",
       tokenVersion: user.tokenVersion,
       userIdentifier: user.identifier,
-      loginIP: loginInput.ipAddr,
-      createdAt: new Date(),
-      expiresAt: tokenExpiresAt,
     };
 
     const tokenJWT = this.jwtService.sign({
-      userIdentifier: tokenEntity.userIdentifier,
-      token: tokenEntity.token,
       expiresAt: tokenExpiresAt,
+      token: tokenEntity.token,
       tokenVersion: user.tokenVersion,
+      userIdentifier: tokenEntity.userIdentifier,
     });
 
-    await this.tokenRepository.revokeToken(tokenEntity);
+    await this.tokenRepository.persistToken(tokenEntity);
 
     return { user, token: tokenJWT, tokenTTL, tokenExpiresAt };
   }
@@ -103,7 +103,7 @@ export class AuthenticationServer {
   }
 
   async logout(token: string): Promise<void> {
-    await this.tokenRepository.deleteToken(token);
+    await this.tokenRepository.revokeToken(token);
   }
 
   async verify(token: string): Promise<boolean> {

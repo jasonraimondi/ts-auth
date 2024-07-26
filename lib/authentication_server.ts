@@ -106,6 +106,14 @@ export class AuthenticationServer {
     await this.tokenRepository.revokeToken(token);
   }
 
+  async parse(token: string): Promise<AccessTokenPayload | null> {
+    const payload = await this.jwtService.decode<AccessTokenPayload>(token);
+
+    if (!this.isAccessTokenPayload(payload)) return null;
+
+    return payload;
+  }
+
   async verify(token: string): Promise<boolean> {
     const payload = await this.jwtService.verify<AccessTokenPayload>(token);
 

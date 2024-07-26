@@ -76,7 +76,6 @@ export class AuthenticationServer {
       loginIP: loginInput.ipAddr,
       token: uuidv7(),
       tokenType: "session",
-      tokenVersion: user.tokenVersion,
       userIdentifier: user.identifier,
     };
 
@@ -100,12 +99,12 @@ export class AuthenticationServer {
     await this.tokenRepository.revokeToken(token);
   }
 
-  async parse(token: string): Promise<AccessTokenPayload | null> {
+  async parse<Payload extends AccessTokenPayload = AccessTokenPayload>(
+    token: string,
+  ): Promise<Payload | null> {
     const payload = await this.jwtService.decode<AccessTokenPayload>(token);
-
     if (!this.isAccessTokenPayload(payload)) return null;
-
-    return payload;
+    return payload as Payload;
   }
 
   async verify(token: string): Promise<boolean> {
@@ -113,12 +112,15 @@ export class AuthenticationServer {
     return success;
   }
 
-  async verifyWithPayload(token: string): Promise<VerifyWithPayloadResponse> {
+  async verifyWithPayload<
+    AuthUser extends AuthUserEntity = AuthUserEntity,
+    Payload extends AccessTokenPayload = AccessTokenPayload,
+  >(token: string): Promise<VerifyWithPayloadResponse<AuthUser, Payload>> {
     const payload = await this.jwtService.verify<AccessTokenPayload>(token);
     if (!this.isAccessTokenPayload(payload)) return { success: false };
 
     const tokenEntity = await this.tokenRepository.getToken(payload.token);
-    const user = await this.userRepository.getByIdentifier(
+    const user = await this.userRepository.getByIdentifier<AuthUser>(
       payload.userIdentifier,
     );
 
@@ -138,12 +140,15 @@ export class AuthenticationServer {
   }
 }
 
-type VerifyWithPayloadResponse = {
+type VerifyWithPayloadResponse<
+  AuthUser extends AuthUserEntity,
+  Payload extends AccessTokenPayload,
+> = {
   success: false;
-  user?: AuthUserEntity;
-  payload?: AccessTokenPayload;
+  user?: AuthUser;
+  payload?: Payload;
 } | {
   success: true;
-  user: AuthUserEntity;
-  payload: AccessTokenPayload;
+  user: AuthUser;
+  payload: Payload;
 };

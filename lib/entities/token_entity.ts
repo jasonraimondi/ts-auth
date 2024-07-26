@@ -3,7 +3,6 @@ import { AuthUserIdentifier } from "./auth_user_entity.ts";
 export interface TokenEntity {
   token: string;
   tokenType: string;
-  tokenVersion?: number;
   loginIP?: string;
   userIdentifier: AuthUserIdentifier;
   createdAt: Date;

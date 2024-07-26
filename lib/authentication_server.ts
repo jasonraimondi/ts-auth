@@ -124,8 +124,7 @@ export class AuthenticationServer {
 
     if (tokenEntity.expiresAt < new Date()) return { success: false };
 
-    const success = payload.tokenVersion === tokenEntity.tokenVersion &&
-      payload.tokenVersion === user.tokenVersion;
+    const success = payload.tokenVersion === user.tokenVersion;
 
     return { success, user, payload };
   }

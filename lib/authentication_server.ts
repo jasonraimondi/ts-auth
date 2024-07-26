@@ -1,16 +1,10 @@
 import { v7 as uuidv7 } from "uuid";
 
 import type { TokenRepositoryInterface } from "./repositories/token_repository.ts";
-import type {
-  AccessTokenPayload,
-  JwtServiceInterface,
-} from "./services/jwt_service.ts";
+import type { AccessTokenPayload, JwtServiceInterface } from "./services/jwt_service.ts";
 import type { PasswordServiceInterface } from "./services/password_service.ts";
 import type { AuthUserRepositoryInterface } from "./repositories/auth_user_repository.ts";
-import type {
-  AuthUserEntity,
-  AuthUserIdentifier,
-} from "./entities/auth_user_entity.ts";
+import type { AuthUserEntity, AuthUserIdentifier } from "./entities/auth_user_entity.ts";
 import type { SessionTokenEntity } from "./entities/token_entity.ts";
 
 export interface LoginResponse {
@@ -115,20 +109,40 @@ export class AuthenticationServer {
   }
 
   async verify(token: string): Promise<boolean> {
+    const { success } = await this.verifyWithPayload(token);
+    return success;
+  }
+
+  async verifyWithPayload(token: string): Promise<VerifyWithPayloadResponse> {
     const payload = await this.jwtService.verify<AccessTokenPayload>(token);
 
-    if (!this.isAccessTokenPayload(payload)) return false;
+    if (!this.isAccessTokenPayload(payload)) return { success: false };
 
-    const tokenEntity = await this.tokenRepository.getToken(token);
+    const tokenEntity = await this.tokenRepository.getToken(payload.token);
 
-    if (tokenEntity.expiresAt < new Date()) return false;
+    const user = await this.userRepository.getByIdentifier(
+      payload.userIdentifier,
+    );
 
-    return payload.tokenVersion === tokenEntity.tokenVersion;
+    if (tokenEntity.expiresAt < new Date()) return { success: false };
+
+    const success = payload.tokenVersion === tokenEntity.tokenVersion &&
+      payload.tokenVersion === user.tokenVersion;
+
+    return { success, user, payload };
   }
 
-  private isAccessTokenPayload(token: unknown): token is AccessTokenPayload {
-    if (!token) return false;
-    if (typeof token !== "object") return false;
-    return "tokenVersion" in token;
+  private isAccessTokenPayload(
+    payload: unknown,
+  ): payload is AccessTokenPayload {
+    if (!payload) return false;
+    if (typeof payload !== "object") return false;
+    return "tokenVersion" in payload;
   }
 }
+
+type VerifyWithPayloadResponse = {
+  success: boolean;
+  user?: AuthUserEntity;
+  payload?: AccessTokenPayload;
+};

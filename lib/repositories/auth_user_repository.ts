@@ -1,7 +1,4 @@
-import type {
-  AuthUserEntity,
-  AuthUserIdentifier,
-} from "../entities/auth_user_entity.ts";
+import type { AuthUserEntity, AuthUserIdentifier } from "../entities/auth_user_entity.ts";
 
 export interface AuthUserRepositoryInterface {
   getByIdentifier(id: AuthUserIdentifier): Promise<AuthUserEntity>;

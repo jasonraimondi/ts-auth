@@ -115,11 +115,9 @@ export class AuthenticationServer {
 
   async verifyWithPayload(token: string): Promise<VerifyWithPayloadResponse> {
     const payload = await this.jwtService.verify<AccessTokenPayload>(token);
-
     if (!this.isAccessTokenPayload(payload)) return { success: false };
 
     const tokenEntity = await this.tokenRepository.getToken(payload.token);
-
     const user = await this.userRepository.getByIdentifier(
       payload.userIdentifier,
     );
@@ -142,7 +140,11 @@ export class AuthenticationServer {
 }
 
 type VerifyWithPayloadResponse = {
-  success: boolean;
+  success: false;
   user?: AuthUserEntity;
   payload?: AccessTokenPayload;
+} | {
+  success: true;
+  user: AuthUserEntity;
+  payload: AccessTokenPayload;
 };

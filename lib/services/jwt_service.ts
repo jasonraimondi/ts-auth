@@ -30,10 +30,10 @@ export class JwtService implements JwtServiceInterface {
       iss: this.config.issuer,
       sub: userId,
       aud: undefined,
-      exp: expiresAt ? this.roundToSeconds(expiresAt) : undefined,
       nbf: now,
       iat: now,
       ...payload,
+      exp: expiresAt ? this.roundToSeconds(expiresAt) : undefined,
       expiresAt,
     }, this.config.secret);
   }

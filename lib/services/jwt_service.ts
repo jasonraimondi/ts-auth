@@ -48,7 +48,7 @@ export class JwtService implements JwtServiceInterface {
 
   protected roundToSeconds(ms: Date | number): number {
     if (ms instanceof Date) ms = ms.getTime();
-    return Math.ceil(ms / 1000);
+    return Math.floor(ms / 1000);
   }
 }
 

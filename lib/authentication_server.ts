@@ -7,19 +7,36 @@ import type { AuthUserRepositoryInterface } from "./repositories/auth_user_repos
 import type { AuthUserEntity, AuthUserIdentifier } from "./entities/auth_user_entity.ts";
 import type { SessionTokenEntity } from "./entities/token_entity.ts";
 
-export interface LoginResponse {
-  user: AuthUserEntity;
+export type LoginResponse<TUser extends AuthUserEntity = AuthUserEntity> = {
+  user: TUser;
   token: string;
   tokenExpiresAt: Date;
   tokenTTL: number;
-}
+};
 
-export interface LoginInput {
-  identifier: string;
+type PasswordLogin = {
+  email: string;
   password: string;
+};
+
+type UserLogin = {
+  user: AuthUserEntity;
+};
+
+type Login = (PasswordLogin | UserLogin) & { rememberMe?: boolean };
+
+type LoginWithIP = Login & {
   ipAddr: string;
-  rememberMe?: boolean;
-}
+};
+
+type LoginInput = LoginWithIP;
+
+// export interface LoginInput {
+//   identifier: string;
+//   password: string;
+//   ipAddr: string;
+//   rememberMe?: boolean;
+// }
 
 export interface AuthenticationServerConfig {
   accessTokenTTL: number;
@@ -46,7 +63,7 @@ export class AuthenticationServer {
   async verifyByUserCredentials<AuthUser extends AuthUserEntity = AuthUserEntity>(
     identifier: AuthUserIdentifier,
     passwordAttempt: string,
-  ): Promise<{ success: true, user: AuthUser } | { success: false, user?: never }> {
+  ): Promise<{ success: true; user: AuthUser } | { success: false; user?: never }> {
     const user = await this.userRepository.getByIdentifier<AuthUser>(identifier);
 
     if (!user || !user.passwordHash) return { success: false };
@@ -61,16 +78,24 @@ export class AuthenticationServer {
     return { success, user };
   }
 
-  async login(loginInput: LoginInput): Promise<LoginResponse> {
-    const { success, user } = await this.verifyByUserCredentials(
-      loginInput.identifier,
-      loginInput.password,
-    );
+  async login<TUser extends AuthUserEntity = AuthUserEntity>(
+    loginInput: LoginInput,
+  ): Promise<LoginResponse<TUser>> {
+    let user: TUser | undefined = undefined;
 
-    if (!success) throw new Error("Invalid login attempt");
+    if ("user" in loginInput) {
+      user = loginInput.user as TUser;
+    } else if ("email" in loginInput) {
+      const verifyRes = await this.verifyByUserCredentials(loginInput.email, loginInput.password);
+      if (verifyRes.user) {
+        user = verifyRes.user as TUser;
+      }
+    }
+
+    if (user === undefined) throw new Error("invalid login");
 
     await this.userRepository.incrementLastLogin?.(
-      loginInput.identifier,
+      user.identifier,
       loginInput.ipAddr,
     );
 

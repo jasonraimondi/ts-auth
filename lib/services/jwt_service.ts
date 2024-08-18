@@ -1,5 +1,5 @@
 import jsonwebtoken, { type JwtPayload } from "jsonwebtoken";
-import type { AuthUserIdentifier } from "../entities/auth_user_entity.ts";
+import type { AuthUserEntity, AuthUserIdentifier } from "../entities/auth_user_entity.ts";
 
 export type JWT = JwtPayload & {
   token: string;
@@ -7,10 +7,22 @@ export type JWT = JwtPayload & {
   expiresAt?: Date | number;
 };
 
+export type ExtraAccessTokenFieldArgs = {
+  user?: AuthUserEntity | null;
+};
+
+export type ExtraAccessTokenFieldsResponse = Record<
+  string,
+  string | number | boolean | (string | number | boolean)[]
+>;
+
 export interface JwtServiceInterface {
   sign(payload: JWT): string;
   verify<T = JwtPayload | string | null>(token: string): T;
   decode<T = JwtPayload | string | null>(token: string): T;
+  extraTokenFields?(
+    params: ExtraAccessTokenFieldArgs,
+  ): ExtraAccessTokenFieldsResponse | Promise<ExtraAccessTokenFieldsResponse>;
 }
 
 export type JwtConfig = {

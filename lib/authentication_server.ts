@@ -115,6 +115,8 @@ export class AuthenticationServer {
     };
 
     const tokenJWT = this.jwtService.sign({
+      ...this.jwtService.extraTokenFields?.({ user }),
+
       expiresAt: tokenExpiresAt,
       token: tokenEntity.token,
       tokenVersion: user.tokenVersion,

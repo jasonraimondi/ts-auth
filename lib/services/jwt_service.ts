@@ -11,9 +11,11 @@ export type ExtraAccessTokenFieldArgs = {
   user?: AuthUserEntity | null;
 };
 
+type Allowed = string | number | boolean | undefined | null;
+
 export type ExtraAccessTokenFieldsResponse = Record<
   string,
-  string | number | boolean | (string | number | boolean)[]
+  Allowed | Allowed[]
 >;
 
 export interface JwtServiceInterface {

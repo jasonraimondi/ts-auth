@@ -60,6 +60,14 @@ export class AuthenticationServer {
     };
   }
 
+  static parseAuthorizationHeader(header?: string | null): string | null {
+    if (!header) return null;
+
+    const [_tokenType, token = null] = header.split(" ");
+
+    return token;
+  }
+
   async verifyByUserCredentials<AuthUser extends AuthUserEntity = AuthUserEntity>(
     identifier: AuthUserIdentifier,
     passwordAttempt: string,

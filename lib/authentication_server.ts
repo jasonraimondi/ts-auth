@@ -49,8 +49,8 @@ export class AuthenticationServer {
   constructor(
     protected readonly userRepository: AuthUserRepositoryInterface,
     protected readonly tokenRepository: TokenRepositoryInterface,
-    protected readonly jwtService: JwtServiceInterface,
-    protected readonly passwordService: PasswordServiceInterface,
+    public readonly jwtService: JwtServiceInterface,
+    public readonly passwordService: PasswordServiceInterface,
     config: Partial<AuthenticationServerConfig>,
   ) {
     this.config = {

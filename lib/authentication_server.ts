@@ -21,6 +21,8 @@ type PasswordLogin = {
 
 type UserLogin = {
   user: AuthUserEntity;
+  // if you pass a password, it will verify it against the user.passwordHash
+  password?: string;
 };
 
 type Login = (PasswordLogin | UserLogin) & { rememberMe?: boolean };
@@ -87,27 +89,29 @@ export class AuthenticationServer {
   }
 
   async login<TUser extends AuthUserEntity = AuthUserEntity>(
-    loginInput: LoginInput,
+    input: LoginInput,
   ): Promise<LoginResponse<TUser>> {
     let user: TUser | undefined = undefined;
 
-    if ("user" in loginInput) {
-      user = loginInput.user as TUser;
-    } else if ("identifier" in loginInput) {
-      const verifyRes = await this.verifyByUserCredentials(loginInput.identifier, loginInput.password);
-      if (verifyRes.user) {
-        user = verifyRes.user as TUser;
+    if ("user" in input) {
+      user = input.user as TUser;
+      if (typeof input.password === "string") {
+        if (typeof user.passwordHash !== "string") throw new Error("invalid login");
+        const success = await this.passwordService.verify(input.password, user.passwordHash);
+        if (!success) throw new Error("invalid login");
+      }
+    } else if ("identifier" in input) {
+      const res = await this.verifyByUserCredentials(input.identifier, input.password);
+      if (res.user) {
+        user = res.user as TUser;
       }
     }
 
     if (user === undefined) throw new Error("invalid login");
 
-    await this.userRepository.incrementLastLogin?.(
-      user.identifier,
-      loginInput.ipAddr,
-    );
+    await this.userRepository.incrementLastLogin?.(user.identifier, input.ipAddr);
 
-    const tokenTTL = loginInput.rememberMe
+    const tokenTTL = input.rememberMe
       ? this.config.accessTokenRememberMeTTL
       : this.config.accessTokenTTL;
 
@@ -116,7 +120,7 @@ export class AuthenticationServer {
     const tokenEntity: SessionTokenEntity = {
       createdAt: new Date(),
       expiresAt: tokenExpiresAt,
-      loginIP: loginInput.ipAddr,
+      loginIP: input.ipAddr,
       token: uuidv7(),
       tokenType: "session",
       userIdentifier: user.identifier,

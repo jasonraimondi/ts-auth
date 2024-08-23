@@ -15,7 +15,7 @@ export type LoginResponse<TUser extends AuthUserEntity = AuthUserEntity> = {
 };
 
 type PasswordLogin = {
-  email: string;
+  identifier: string;
   password: string;
 };
 
@@ -93,8 +93,8 @@ export class AuthenticationServer {
 
     if ("user" in loginInput) {
       user = loginInput.user as TUser;
-    } else if ("email" in loginInput) {
-      const verifyRes = await this.verifyByUserCredentials(loginInput.email, loginInput.password);
+    } else if ("identifier" in loginInput) {
+      const verifyRes = await this.verifyByUserCredentials(loginInput.identifier, loginInput.password);
       if (verifyRes.user) {
         user = verifyRes.user as TUser;
       }

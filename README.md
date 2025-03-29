@@ -12,7 +12,8 @@ A JWT-based authentication system with session management.
 ## Installation
 
 ```bash
-npm install @your-org/auth-server
+pnpm dlx jsr add @jmondi/auth
+deno add jsr:@jmondi/auth
 ```
 
 ## Usage

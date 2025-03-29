@@ -73,7 +73,7 @@ export type AccessTokenPayload = JWT & {
 };
 
 export class AccessTokenJwtService extends JwtService {
-  sign(payload: AccessTokenPayload): string {
+  override sign(payload: AccessTokenPayload): string {
     return super.sign(payload);
   }
 }

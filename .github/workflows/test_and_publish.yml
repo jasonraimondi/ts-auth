@@ -1,14 +1,19 @@
-name: Continuous Integration
-
+name: Publish
 on:
   push:
+    branches:
+      - main
 
 jobs:
-  publish-jsr:
+  publish:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       id-token: write
+
     steps:
       - uses: actions/checkout@v4
-      - run: npx jsr publish
+
+      - name: Publish package
+        run: npx jsr publish

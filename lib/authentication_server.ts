@@ -6,6 +6,7 @@ import type { PasswordServiceInterface } from "./services/password_service.ts";
 import type { AuthUserRepositoryInterface } from "./repositories/auth_user_repository.ts";
 import type { AuthUserEntity, AuthUserIdentifier } from "./entities/auth_user_entity.ts";
 import type { SessionTokenEntity } from "./entities/token_entity.ts";
+import { InvalidLoginError } from "./errors/invalid_login_error.ts";
 
 export type LoginResponse<TUser extends AuthUserEntity = AuthUserEntity> = {
   user: TUser;
@@ -96,9 +97,9 @@ export class AuthenticationServer {
     if ("user" in input) {
       user = input.user as TUser;
       if (typeof input.password === "string") {
-        if (typeof user.passwordHash !== "string") throw new Error("invalid login");
+        if (typeof user.passwordHash !== "string") throw new InvalidLoginError();
         const success = await this.passwordService.verify(input.password, user.passwordHash);
-        if (!success) throw new Error("invalid login");
+        if (!success) throw new InvalidLoginError();
       }
     } else if ("identifier" in input) {
       const res = await this.verifyByUserCredentials(input.identifier, input.password);
@@ -107,10 +108,12 @@ export class AuthenticationServer {
       }
     }
 
-    if (user === undefined) throw new Error("invalid login");
+    if (user === undefined) throw new InvalidLoginError();
 
-    await this.userRepository.incrementLastLogin?.(user.identifier, input.ipAddr);
-
+    if (this.userRepository.incrementLastLogin) {
+      await this.userRepository.incrementLastLogin(user.identifier, input.ipAddr);
+    }
+    
     const tokenTTL = input.rememberMe
       ? this.config.accessTokenRememberMeTTL
       : this.config.accessTokenTTL;

@@ -113,7 +113,7 @@ export class AuthenticationServer {
     if (this.userRepository.incrementLastLogin) {
       await this.userRepository.incrementLastLogin(user.identifier, input.ipAddr);
     }
-    
+
     const tokenTTL = input.rememberMe
       ? this.config.accessTokenRememberMeTTL
       : this.config.accessTokenTTL;

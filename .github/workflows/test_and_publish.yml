@@ -17,16 +17,16 @@ jobs:
           deno-version: 2.x
       - run: deno fmt --check
       - run: deno test --allow-none --allow-env --coverage=./coverage
-#      - run: deno coverage ./coverage --lcov --output=coverage/lcov.info
-#      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-#        name: report coverage to code climate
-#        run: |
-#          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-#          chmod +x ./cc-test-reporter
-#          ./cc-test-reporter format-coverage -t lcov coverage/lcov.info
-#          ./cc-test-reporter upload-coverage
-#        env:
-#          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  #      - run: deno coverage ./coverage --lcov --output=coverage/lcov.info
+  #      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #        name: report coverage to code climate
+  #        run: |
+  #          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  #          chmod +x ./cc-test-reporter
+  #          ./cc-test-reporter format-coverage -t lcov coverage/lcov.info
+  #          ./cc-test-reporter upload-coverage
+  #        env:
+  #          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
   publish-jsr:
     needs: test
